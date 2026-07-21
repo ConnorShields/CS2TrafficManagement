@@ -53,7 +53,7 @@ export const TransitLinesButton = () => {
     const visibleLines = sortedLines.filter((line) => line.type === visibleType);
 
     return (
-        <>
+        <div style={{ position: "relative" }}>
             <FloatingButton
                 src="Media/Game/Icons/Routetool.svg"
                 tooltipLabel="Transit Lines"
@@ -61,7 +61,11 @@ export const TransitLinesButton = () => {
                 onSelect={() => setOpen(!open)}
             />
             {open && (
-                <Panel header={<div>Transit Lines</div>} onClose={() => setOpen(false)}>
+                <Panel
+                    header={<div>Transit Lines</div>}
+                    onClose={() => setOpen(false)}
+                    style={{ position: "absolute", top: "100%", right: 0, marginTop: "0.5rem" }}
+                >
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.5rem" }}>
                         {types.map((type) => (
                             <Button
@@ -121,6 +125,6 @@ export const TransitLinesButton = () => {
                     </div>
                 </Panel>
             )}
-        </>
+        </div>
     );
 };
