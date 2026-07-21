@@ -29,6 +29,8 @@ C# side: this is a standard CS2 mod project built with the [Cities: Skylines II 
 
 UI side: from the `UI/` folder, run `npm install` then `npm run build` (requires the `CSII_USERDATAPATH` environment variable, set by the modding toolchain installer). Both the C# DLL and the UI bundle deploy to the same `Mods/RouteSelector` folder.
 
+**Gotcha:** the C# build's toolchain-provided `DeployWIP` target (in the shared `Mod.targets`, outside this repo) wipes the entire `Mods/RouteSelector` folder before copying its own output — it has no awareness of the UI bundle sitting there. So a C# build alone will silently delete the last `npm run build` output (and vice versa isn't a problem, since the UI build only writes its own files). After rebuilding the C# project, always re-run `npm run build` too before testing in-game, or the toolbar panel's UI will be missing even though the mod DLL loads fine.
+
 ## Changelog
 
 - Fixed a bug where a line being actively drawn with the game's own line tool would briefly appear in the panel (as a placeholder entry) before the line was actually finished. The line entity query in `TransitLineListUISystem.cs` now excludes entities carrying the game's `Game.Tools.Temp` component, which the tool attaches to in-progress preview entities, so only completed lines are listed.
