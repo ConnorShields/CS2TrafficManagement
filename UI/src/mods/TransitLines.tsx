@@ -26,6 +26,25 @@ function editLine(line: LineInfo) {
     toolbar.selectAsset(line.prefab, true);
 }
 
+function showAllLines(lines: LineInfo[]) {
+    for (const line of lines) {
+        transport.showLine(line.entity, false);
+    }
+}
+
+// Fixed at 4 per row rather than a flex-wrap, since flex-wrap only wraps once
+// the panel runs out of width — with enough transit types in play, the panel
+// just grows wider instead of wrapping.
+const TYPE_BUTTONS_PER_ROW = 4;
+
+function chunk<T>(items: T[], size: number): T[][] {
+    const rows: T[][] = [];
+    for (let i = 0; i < items.length; i += size) {
+        rows.push(items.slice(i, i + size));
+    }
+    return rows;
+}
+
 const lines$ = bindValue<LineInfo[]>("routeSelector", "lines", []);
 
 // Game.Prefabs.TransportType values we expect to see on player-built lines.
@@ -52,6 +71,7 @@ export const TransitLinesButton = () => {
     const sortedLines = [...lines].sort((a, b) => a.entity.index - b.entity.index);
 
     const types = Array.from(new Set(sortedLines.map((line) => line.type))).sort((a, b) => a - b);
+    const typeRows = chunk(types, TYPE_BUTTONS_PER_ROW);
     const visibleType = activeType !== null && types.includes(activeType) ? activeType : types[0] ?? null;
     const visibleLines = sortedLines.filter((line) => line.type === visibleType);
 
@@ -87,16 +107,25 @@ export const TransitLinesButton = () => {
                             header={<div>Transit Lines</div>}
                             onClose={() => setOpen(false)}
                         >
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                                {types.map((type) => (
-                                    <Button
-                                        key={type}
-                                        variant="flat"
-                                        selected={type === visibleType}
-                                        onSelect={() => setActiveType(type)}
-                                    >
-                                        {TRANSPORT_TYPE_NAMES[type] ?? `Type ${type}`}
-                                    </Button>
+                            <div style={{ marginBottom: "0.5rem" }}>
+                                <Button variant="flat" onSelect={() => showAllLines(visibleLines)}>
+                                    Show All
+                                </Button>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                                {typeRows.map((row, i) => (
+                                    <div key={i} style={{ display: "flex", gap: "0.5rem" }}>
+                                        {row.map((type) => (
+                                            <Button
+                                                key={type}
+                                                variant="flat"
+                                                selected={type === visibleType}
+                                                onSelect={() => setActiveType(type)}
+                                            >
+                                                {TRANSPORT_TYPE_NAMES[type] ?? `Type ${type}`}
+                                            </Button>
+                                        ))}
+                                    </div>
                                 ))}
                             </div>
                             <div>
